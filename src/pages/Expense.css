@@ -131,7 +131,41 @@
 .field-input::placeholder { color: var(--text-muted); }
 .date-input { color-scheme: light; }
 
-/* === Bottom: numpad + actions (ALWAYS VISIBLE) === */
+/* === Submit row (inside scroll area) === */
+.submit-row {
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px;
+}
+
+.submit-row .btn-clear {
+  flex: 1;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.submit-row .btn-submit {
+  flex: 2;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--primary);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  transition: opacity 0.2s;
+}
+
+.submit-row .btn-submit:disabled { opacity: 0.35; }
+.submit-row .btn-submit:active:not(:disabled) { opacity: 0.85; }
+.submit-row .submit-income { background: var(--income); }
+
+/* === Bottom: numpad only === */
 .expense-bottom {
   flex-shrink: 0;
   border-top: 1px solid var(--border);
@@ -159,38 +193,6 @@
 .num-delete { font-size: 16px; color: var(--text-secondary); }
 .num-dot { font-weight: 700; }
 
-/* === Action Buttons === */
-.numpad-actions {
-  display: flex;
-  gap: 1px;
-  background: var(--border);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-.btn-clear {
-  flex: 1;
-  padding: 13px;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  background: var(--card);
-  text-align: center;
-}
-
-.btn-submit {
-  flex: 2;
-  padding: 13px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--primary);
-  text-align: center;
-  transition: opacity 0.2s;
-}
-
-.btn-submit:disabled { opacity: 0.35; }
-.btn-submit:active:not(:disabled) { opacity: 0.85; }
-.submit-income { background: var(--income); }
 
 /* === Toast === */
 .toast {

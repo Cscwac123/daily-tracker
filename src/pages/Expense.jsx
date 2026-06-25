@@ -53,7 +53,7 @@ export default function Expense({ onSaved }) {
 
   return (
     <div className="page expense-page">
-      {/* scrollable upper area */}
+      {/* scrollable area: form fields + submit button */}
       <div className="expense-scroll">
         {/* Type toggle */}
         <div className="expense-type-toggle">
@@ -103,9 +103,19 @@ export default function Expense({ onSaved }) {
               onChange={e => setNote(e.target.value)} maxLength={30} />
           </div>
         </div>
+
+        {/* Submit & Clear buttons - right below note */}
+        <div className="submit-row">
+          <button className="btn-clear" onClick={handleClear}>清空</button>
+          <button
+            className={`btn-submit ${type === 'income' ? 'submit-income' : ''}`}
+            onClick={handleSubmit}
+            disabled={!amount}
+          >记一笔</button>
+        </div>
       </div>
 
-      {/* fixed bottom: numpad + actions */}
+      {/* fixed bottom: numpad only */}
       <div className="expense-bottom">
         <div className="numpad">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, '⌫'].map(key => (
@@ -115,14 +125,6 @@ export default function Expense({ onSaved }) {
               onClick={() => key === '⌫' ? handleDelete() : handleNum(String(key))}
             >{key}</button>
           ))}
-        </div>
-        <div className="numpad-actions">
-          <button className="btn-clear" onClick={handleClear}>清空</button>
-          <button
-            className={`btn-submit ${type === 'income' ? 'submit-income' : ''}`}
-            onClick={handleSubmit}
-            disabled={!amount}
-          >记一笔</button>
         </div>
       </div>
 
