@@ -10,20 +10,18 @@ export default function Expense({ onSaved }) {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [numpadOpen, setNumpadOpen] = useState(false);
 
   const categories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
-  // Number pad
   const handleNum = (num) => {
     if (num === '.') {
       if (amount.includes('.')) return;
       if (amount === '') return;
     }
     const next = amount + num;
-    // Max 2 decimal places
     const parts = next.split('.');
     if (parts[1] && parts[1].length > 2) return;
-    // Max 9 digits
     if (parts[0].length > 9) return;
     setAmount(next);
   };
@@ -50,14 +48,12 @@ export default function Expense({ onSaved }) {
       createdAt: new Date().toISOString(),
     });
 
-    // Show toast
     setShowToast(true);
     setTimeout(() => setShowToast(false), 1500);
 
-    // Reset amount & note, keep category/type/date
     setAmount('');
     setNote('');
-    // Tell parent to refresh home
+    setNumpadOpen(false);
     if (onSaved) onSaved();
   };
 
@@ -70,25 +66,25 @@ export default function Expense({ onSaved }) {
         <button
           className={`type-btn expense-type ${type === 'expense' ? 'active' : ''}`}
           onClick={() => { setType('expense'); setCategory('food'); }}
-        >
-          支出
-        </button>
+        >支出</button>
         <button
           className={`type-btn income-type ${type === 'income' ? 'active' : ''}`}
           onClick={() => { setType('income'); setCategory('salary'); }}
-        >
-          收入
-        </button>
+        >收入</button>
       </div>
 
-      {/* Amount display */}
-      <div className={`amount-display ${type === 'income' ? 'income-color' : ''}`}>
+      {/* Amount display — tap to open numpad */}
+      <button
+        className={`amount-display ${numpadOpen ? 'numpad-open' : ''} ${type === 'income' ? 'income-color' : ''}`}
+        onClick={() => setNumpadOpen(true)}
+      >
         <span className="currency">¥</span>
         <span className="amount-value">{displayAmount}</span>
-      </div>
+        {!numpadOpen && <span className="amount-hint">点击输入金额</span>}
+      </button>
 
-      <div className="expense-body">
-        {/* Category picker */}
+      {/* Main content area */}
+      <div className={`expense-body ${numpadOpen ? 'shrunk' : ''}`}>
         <div className="category-grid">
           {categories.map(cat => (
             <button
@@ -105,7 +101,6 @@ export default function Expense({ onSaved }) {
           ))}
         </div>
 
-        {/* Date & Note */}
         <div className="extra-fields">
           <div className="field-row">
             <span className="field-icon">📅</span>
@@ -130,40 +125,42 @@ export default function Expense({ onSaved }) {
         </div>
       </div>
 
-      {/* Number pad */}
-      <div className="numpad">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, '⌫'].map(key => (
-          <button
-            key={key}
-            className={`numpad-btn ${key === '⌫' ? 'num-delete' : ''} ${key === '.' ? 'num-dot' : ''}`}
-            onClick={() => {
-              if (key === '⌫') handleDelete();
-              else handleNum(String(key));
-            }}
-          >
-            {key}
-          </button>
-        ))}
-      </div>
-
-      {/* Action buttons */}
-      <div className="numpad-actions">
-        <button className="btn-clear" onClick={handleClear}>清空</button>
-        <button
-          className={`btn-submit ${type === 'income' ? 'submit-income' : ''}`}
-          onClick={handleSubmit}
-          disabled={!amount}
-        >
-          记一笔
-        </button>
-      </div>
-
-      {/* Toast */}
-      {showToast && (
-        <div className="toast anim-pop-in">
-          ✅ 已记录
+      {/* Numpad overlay */}
+      {numpadOpen && (
+        <div className="numpad-sheet anim-slide-up">
+          <div className="numpad-header">
+            <button className="numpad-collapse" onClick={() => setNumpadOpen(false)}>
+              收起 ▼
+            </button>
+          </div>
+          <div className="numpad">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, '⌫'].map(key => (
+              <button
+                key={key}
+                className={`numpad-btn ${key === '⌫' ? 'num-delete' : ''} ${key === '.' ? 'num-dot' : ''}`}
+                onClick={() => {
+                  if (key === '⌫') handleDelete();
+                  else handleNum(String(key));
+                }}
+              >
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="numpad-actions">
+            <button className="btn-clear" onClick={handleClear}>清空</button>
+            <button
+              className={`btn-submit ${type === 'income' ? 'submit-income' : ''}`}
+              onClick={handleSubmit}
+              disabled={!amount}
+            >
+              记一笔
+            </button>
+          </div>
         </div>
       )}
+
+      {showToast && <div className="toast anim-pop-in">✅ 已记录</div>}
     </div>
   );
 }

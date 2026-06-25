@@ -28,31 +28,51 @@
   color: #fff;
 }
 
-/* === Amount Display === */
+/* === Amount Display (tappable) === */
 .amount-display {
-  text-align: center;
-  padding: 12px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 16px 14px;
   background: var(--card);
   border-bottom: 1px solid var(--border);
+  width: 100%;
+  gap: 4px;
+  transition: padding 0.25s;
 }
 
-.currency {
+.amount-display.numpad-open {
+  padding: 8px 16px 6px;
+}
+
+.amount-display .currency {
   font-size: 22px;
   font-weight: 300;
   color: var(--primary);
-  margin-right: 2px;
 }
 
-.amount-value {
-  font-size: 38px;
+.amount-display .amount-value {
+  font-size: 42px;
   font-weight: 700;
   color: var(--primary);
   letter-spacing: -1px;
   font-variant-numeric: tabular-nums;
+  line-height: 1.1;
 }
 
-.income-color .currency,
-.income-color .amount-value {
+.amount-display.numpad-open .amount-value {
+  font-size: 28px;
+}
+
+.amount-display .amount-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.amount-display.income-color .currency,
+.amount-display.income-color .amount-value {
   color: var(--income);
 }
 
@@ -62,6 +82,12 @@
   min-height: 0;
   overflow-y: auto;
   padding: 8px 16px;
+  transition: flex 0.3s;
+}
+
+.expense-body.shrunk {
+  flex: 0 0 auto;
+  max-height: 40vh;
 }
 
 /* === Category Grid === */
@@ -92,11 +118,11 @@
 }
 
 .cat-item-icon {
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .cat-item-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-secondary);
   font-weight: 500;
 }
@@ -137,13 +163,32 @@
   color-scheme: light;
 }
 
+/* === Numpad Bottom Sheet === */
+.numpad-sheet {
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+.numpad-header {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 0;
+}
+
+.numpad-collapse {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 16px;
+}
+
 /* === Number Pad === */
 .numpad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
   background: var(--border);
-  border-top: 1px solid var(--border);
 }
 
 .numpad-btn {
