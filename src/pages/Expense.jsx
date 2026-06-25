@@ -10,7 +10,6 @@ export default function Expense({ onSaved }) {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState('');
   const [showToast, setShowToast] = useState(false);
-  const [numpadOpen, setNumpadOpen] = useState(true);
 
   const categories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
@@ -26,13 +25,8 @@ export default function Expense({ onSaved }) {
     setAmount(next);
   };
 
-  const handleDelete = () => {
-    setAmount(prev => prev.slice(0, -1));
-  };
-
-  const handleClear = () => {
-    setAmount('');
-  };
+  const handleDelete = () => setAmount(prev => prev.slice(0, -1));
+  const handleClear = () => setAmount('');
 
   const handleSubmit = () => {
     const num = parseFloat(amount);
@@ -50,7 +44,6 @@ export default function Expense({ onSaved }) {
 
     setShowToast(true);
     setTimeout(() => setShowToast(false), 1500);
-
     setAmount('');
     setNote('');
     if (onSaved) onSaved();
@@ -59,31 +52,28 @@ export default function Expense({ onSaved }) {
   const displayAmount = amount || '0';
 
   return (
-    <div className="page">
-      {/* Type toggle */}
-      <div className="expense-type-toggle">
-        <button
-          className={`type-btn expense-type ${type === 'expense' ? 'active' : ''}`}
-          onClick={() => { setType('expense'); setCategory('food'); }}
-        >支出</button>
-        <button
-          className={`type-btn income-type ${type === 'income' ? 'active' : ''}`}
-          onClick={() => { setType('income'); setCategory('salary'); }}
-        >收入</button>
-      </div>
+    <div className="page expense-page">
+      {/* scrollable upper area */}
+      <div className="expense-scroll">
+        {/* Type toggle */}
+        <div className="expense-type-toggle">
+          <button
+            className={`type-btn expense-type ${type === 'expense' ? 'active' : ''}`}
+            onClick={() => { setType('expense'); setCategory('food'); }}
+          >支出</button>
+          <button
+            className={`type-btn income-type ${type === 'income' ? 'active' : ''}`}
+            onClick={() => { setType('income'); setCategory('salary'); }}
+          >收入</button>
+        </div>
 
-      {/* Amount display — tap to open numpad */}
-      <button
-        className={`amount-display ${numpadOpen ? 'numpad-open' : ''} ${type === 'income' ? 'income-color' : ''}`}
-        onClick={() => setNumpadOpen(true)}
-      >
-        <span className="currency">¥</span>
-        <span className="amount-value">{displayAmount}</span>
-        {!numpadOpen && <span className="amount-hint">点击输入金额</span>}
-      </button>
+        {/* Amount display */}
+        <div className={`amount-display ${type === 'income' ? 'income-color' : ''}`}>
+          <span className="currency">¥</span>
+          <span className="amount-value">{displayAmount}</span>
+        </div>
 
-      {/* Main content area */}
-      <div className={`expense-body ${numpadOpen ? 'shrunk' : ''}`}>
+        {/* Category picker */}
         <div className="category-grid">
           {categories.map(cat => (
             <button
@@ -100,64 +90,41 @@ export default function Expense({ onSaved }) {
           ))}
         </div>
 
+        {/* Date & Note */}
         <div className="extra-fields">
           <div className="field-row">
             <span className="field-icon">📅</span>
-            <input
-              type="date"
-              className="field-input date-input"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-            />
+            <input type="date" className="field-input date-input" value={date}
+              onChange={e => setDate(e.target.value)} />
           </div>
           <div className="field-row">
             <span className="field-icon">📝</span>
-            <input
-              type="text"
-              className="field-input"
-              placeholder="添加备注..."
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              maxLength={30}
-            />
+            <input type="text" className="field-input" placeholder="添加备注..." value={note}
+              onChange={e => setNote(e.target.value)} maxLength={30} />
           </div>
         </div>
       </div>
 
-      {/* Numpad overlay */}
-      {numpadOpen && (
-        <div className="numpad-sheet anim-slide-up">
-          <div className="numpad-header">
-            <button className="numpad-collapse" onClick={() => setNumpadOpen(false)}>
-              收起 ▼
-            </button>
-          </div>
-          <div className="numpad">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, '⌫'].map(key => (
-              <button
-                key={key}
-                className={`numpad-btn ${key === '⌫' ? 'num-delete' : ''} ${key === '.' ? 'num-dot' : ''}`}
-                onClick={() => {
-                  if (key === '⌫') handleDelete();
-                  else handleNum(String(key));
-                }}
-              >
-                {key}
-              </button>
-            ))}
-          </div>
-          <div className="numpad-actions">
-            <button className="btn-clear" onClick={handleClear}>清空</button>
+      {/* fixed bottom: numpad + actions */}
+      <div className="expense-bottom">
+        <div className="numpad">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, '⌫'].map(key => (
             <button
-              className={`btn-submit ${type === 'income' ? 'submit-income' : ''}`}
-              onClick={handleSubmit}
-              disabled={!amount}
-            >
-              记一笔
-            </button>
-          </div>
+              key={key}
+              className={`numpad-btn ${key === '⌫' ? 'num-delete' : ''} ${key === '.' ? 'num-dot' : ''}`}
+              onClick={() => key === '⌫' ? handleDelete() : handleNum(String(key))}
+            >{key}</button>
+          ))}
         </div>
-      )}
+        <div className="numpad-actions">
+          <button className="btn-clear" onClick={handleClear}>清空</button>
+          <button
+            className={`btn-submit ${type === 'income' ? 'submit-income' : ''}`}
+            onClick={handleSubmit}
+            disabled={!amount}
+          >记一笔</button>
+        </div>
+      </div>
 
       {showToast && <div className="toast anim-pop-in">✅ 已记录</div>}
     </div>

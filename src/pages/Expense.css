@@ -1,14 +1,28 @@
+/* === Page layout === */
+.expense-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.expense-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 /* === Type Toggle === */
 .expense-type-toggle {
   display: flex;
-  padding: 10px 16px;
+  padding: 8px 16px;
   gap: 10px;
   background: var(--card);
 }
 
 .type-btn {
   flex: 1;
-  padding: 8px;
+  padding: 7px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
@@ -28,32 +42,24 @@
   color: #fff;
 }
 
-/* === Amount Display (tappable) === */
+/* === Amount Display === */
 .amount-display {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
-  padding: 18px 16px 14px;
+  gap: 2px;
+  padding: 12px 16px 8px;
   background: var(--card);
-  border-bottom: 1px solid var(--border);
-  width: 100%;
-  gap: 4px;
-  transition: padding 0.25s;
-}
-
-.amount-display.numpad-open {
-  padding: 8px 16px 6px;
 }
 
 .amount-display .currency {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 300;
   color: var(--primary);
 }
 
 .amount-display .amount-value {
-  font-size: 42px;
+  font-size: 34px;
   font-weight: 700;
   color: var(--primary);
   letter-spacing: -1px;
@@ -61,41 +67,17 @@
   line-height: 1.1;
 }
 
-.amount-display.numpad-open .amount-value {
-  font-size: 28px;
-}
-
-.amount-display .amount-hint {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 400;
-}
-
 .amount-display.income-color .currency,
 .amount-display.income-color .amount-value {
   color: var(--income);
-}
-
-/* === Expense Body === */
-.expense-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 8px 16px;
-  transition: flex 0.3s;
-}
-
-.expense-body.shrunk {
-  flex: 0 0 auto;
-  max-height: 40vh;
 }
 
 /* === Category Grid === */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: 4px;
+  padding: 6px 16px;
 }
 
 .cat-item {
@@ -103,23 +85,15 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 8px 2px;
+  padding: 6px 2px;
   border-radius: var(--radius-sm);
   border: 1.5px solid transparent;
   transition: all 0.2s;
 }
 
-.cat-item:active {
-  transform: scale(0.93);
-}
-
-.cat-item.selected {
-  border-color: var(--primary);
-}
-
-.cat-item-icon {
-  font-size: 22px;
-}
+.cat-item:active { transform: scale(0.93); }
+.cat-item.selected { border-color: var(--primary); }
+.cat-item-icon { font-size: 20px; }
 
 .cat-item-label {
   font-size: 10px;
@@ -132,6 +106,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 0 16px 8px;
 }
 
 .field-row {
@@ -139,14 +114,12 @@
   align-items: center;
   gap: 8px;
   background: var(--card);
-  padding: 8px 12px;
+  padding: 7px 10px;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
 }
 
-.field-icon {
-  font-size: 18px;
-}
+.field-icon { font-size: 16px; }
 
 .field-input {
   flex: 1;
@@ -155,35 +128,16 @@
   background: none;
 }
 
-.field-input::placeholder {
-  color: var(--text-muted);
-}
+.field-input::placeholder { color: var(--text-muted); }
+.date-input { color-scheme: light; }
 
-.date-input {
-  color-scheme: light;
-}
-
-/* === Numpad Bottom Sheet === */
-.numpad-sheet {
+/* === Bottom: numpad + actions (ALWAYS VISIBLE) === */
+.expense-bottom {
+  flex-shrink: 0;
   border-top: 1px solid var(--border);
   background: var(--card);
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
-  flex-shrink: 0;
 }
 
-.numpad-header {
-  display: flex;
-  justify-content: center;
-  padding: 4px 0 0;
-}
-
-.numpad-collapse {
-  font-size: 12px;
-  color: var(--text-muted);
-  padding: 4px 16px;
-}
-
-/* === Number Pad === */
 .numpad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -192,8 +146,8 @@
 }
 
 .numpad-btn {
-  padding: 12px 8px;
-  font-size: 22px;
+  padding: 12px;
+  font-size: 20px;
   font-weight: 500;
   color: var(--text);
   background: var(--card);
@@ -201,18 +155,9 @@
   transition: background 0.15s;
 }
 
-.numpad-btn:active {
-  background: var(--bg);
-}
-
-.num-delete {
-  font-size: 18px;
-  color: var(--text-secondary);
-}
-
-.num-dot {
-  font-weight: 700;
-}
+.numpad-btn:active { background: var(--bg); }
+.num-delete { font-size: 16px; color: var(--text-secondary); }
+.num-dot { font-weight: 700; }
 
 /* === Action Buttons === */
 .numpad-actions {
@@ -224,8 +169,8 @@
 
 .btn-clear {
   flex: 1;
-  padding: 12px;
-  font-size: 16px;
+  padding: 13px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--text-secondary);
   background: var(--card);
@@ -234,30 +179,22 @@
 
 .btn-submit {
   flex: 2;
-  padding: 12px;
-  font-size: 17px;
-  font-weight: 600;
+  padding: 13px;
+  font-size: 16px;
+  font-weight: 700;
   color: #fff;
   background: var(--primary);
   text-align: center;
   transition: opacity 0.2s;
 }
 
-.btn-submit:disabled {
-  opacity: 0.4;
-}
-
-.btn-submit:active:not(:disabled) {
-  opacity: 0.8;
-}
-
-.submit-income {
-  background: var(--income);
-}
+.btn-submit:disabled { opacity: 0.35; }
+.btn-submit:active:not(:disabled) { opacity: 0.85; }
+.submit-income { background: var(--income); }
 
 /* === Toast === */
 .toast {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
