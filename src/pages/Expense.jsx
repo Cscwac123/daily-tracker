@@ -10,7 +10,7 @@ export default function Expense({ onSaved }) {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState('');
   const [showToast, setShowToast] = useState(false);
-  const [numpadOpen, setNumpadOpen] = useState(false);
+  const [numpadOpen, setNumpadOpen] = useState(true);
 
   const categories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
@@ -53,7 +53,6 @@ export default function Expense({ onSaved }) {
 
     setAmount('');
     setNote('');
-    setNumpadOpen(false);
     if (onSaved) onSaved();
   };
 
