@@ -45,11 +45,15 @@
 /* === Amount Display === */
 .amount-display {
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 12px 16px 8px;
+  padding: 14px 16px 10px;
   background: var(--card);
+  width: 100%;
+  border-bottom: 1px solid var(--border);
+  transition: padding 0.25s;
 }
 
 .amount-display .currency {
@@ -65,6 +69,36 @@
   letter-spacing: -1px;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
+}
+
+.amount-display .currency {
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--primary);
+}
+
+.amount-display .amount-value {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.amount-display .amount-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.amount-display.numpad-open {
+  padding: 8px 16px 6px;
+}
+
+.amount-display.numpad-open .amount-value {
+  font-size: 28px;
 }
 
 .amount-display.income-color .currency,
@@ -164,6 +198,20 @@
 .submit-row .btn-submit:disabled { opacity: 0.35; }
 .submit-row .btn-submit:active:not(:disabled) { opacity: 0.85; }
 .submit-row .submit-income { background: var(--income); }
+
+/* === Numpad header === */
+.numpad-header {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 0;
+  background: var(--card);
+}
+
+.numpad-collapse {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 16px;
+}
 
 /* === Bottom: numpad only === */
 .expense-bottom {

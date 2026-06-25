@@ -33,14 +33,22 @@ export default function App() {
       }
       lastScrollY.current = st;
 
-      // show tab bar after 3s idle
       clearTimeout(hideTimer.current);
       hideTimer.current = setTimeout(() => setTabVisible(true), 3000);
     };
 
+    /* ── numpad open/close events ── */
+    const hideTab = () => { setTabVisible(false); clearTimeout(hideTimer.current); };
+    const showTab = () => setTabVisible(true);
+
     document.addEventListener('scroll', handleScroll, { capture: true, passive: true });
+    window.addEventListener('hide-tabbar', hideTab);
+    window.addEventListener('show-tabbar', showTab);
+
     return () => {
       document.removeEventListener('scroll', handleScroll, { capture: true });
+      window.removeEventListener('hide-tabbar', hideTab);
+      window.removeEventListener('show-tabbar', showTab);
       clearTimeout(hideTimer.current);
     };
   }, []);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { saveExpense } from '../utils/storage';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../utils/categories';
 import './Expense.css';
@@ -10,8 +10,21 @@ export default function Expense({ onSaved }) {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [numpadOpen, setNumpadOpen] = useState(false);
 
   const categories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+
+  /* ── control bottom tab bar ── */
+  useEffect(() => {
+    if (numpadOpen) {
+      window.dispatchEvent(new Event('hide-tabbar'));
+    } else {
+      window.dispatchEvent(new Event('show-tabbar'));
+    }
+    return () => {
+      window.dispatchEvent(new Event('show-tabbar'));
+    };
+  }, [numpadOpen]);
 
   const handleNum = (num) => {
     if (num === '.') {
@@ -46,6 +59,7 @@ export default function Expense({ onSaved }) {
     setTimeout(() => setShowToast(false), 1500);
     setAmount('');
     setNote('');
+    setNumpadOpen(false);
     if (onSaved) onSaved();
   };
 
@@ -67,11 +81,15 @@ export default function Expense({ onSaved }) {
           >收入</button>
         </div>
 
-        {/* Amount display */}
-        <div className={`amount-display ${type === 'income' ? 'income-color' : ''}`}>
+        {/* Amount display — tap to open numpad */}
+        <button
+          className={`amount-display ${numpadOpen ? 'numpad-open' : ''} ${type === 'income' ? 'income-color' : ''}`}
+          onClick={() => setNumpadOpen(true)}
+        >
           <span className="currency">¥</span>
           <span className="amount-value">{displayAmount}</span>
-        </div>
+          {!numpadOpen && <span className="amount-hint">点击输入金额</span>}
+        </button>
 
         {/* Category picker */}
         <div className="category-grid">
@@ -104,7 +122,7 @@ export default function Expense({ onSaved }) {
           </div>
         </div>
 
-        {/* Submit & Clear buttons - right below note */}
+        {/* Submit & Clear buttons */}
         <div className="submit-row">
           <button className="btn-clear" onClick={handleClear}>清空</button>
           <button
@@ -115,18 +133,25 @@ export default function Expense({ onSaved }) {
         </div>
       </div>
 
-      {/* fixed bottom: numpad only */}
-      <div className="expense-bottom">
-        <div className="numpad">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, '⌫'].map(key => (
-            <button
-              key={key}
-              className={`numpad-btn ${key === '⌫' ? 'num-delete' : ''} ${key === '.' ? 'num-dot' : ''}`}
-              onClick={() => key === '⌫' ? handleDelete() : handleNum(String(key))}
-            >{key}</button>
-          ))}
+      {/* Numpad — slides up when open */}
+      {numpadOpen && (
+        <div className="expense-bottom anim-slide-up">
+          <div className="numpad-header">
+            <button className="numpad-collapse" onClick={() => setNumpadOpen(false)}>
+              收起键盘 ▼
+            </button>
+          </div>
+          <div className="numpad">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, '⌫'].map(key => (
+              <button
+                key={key}
+                className={`numpad-btn ${key === '⌫' ? 'num-delete' : ''} ${key === '.' ? 'num-dot' : ''}`}
+                onClick={() => key === '⌫' ? handleDelete() : handleNum(String(key))}
+              >{key}</button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {showToast && <div className="toast anim-pop-in">✅ 已记录</div>}
     </div>
