@@ -9,14 +9,32 @@ export default function Notes() {
   const [notes, setNotes] = useState(getNotes);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [selectedTag, setSelectedTag] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
 
   const refresh = () => setNotes(getNotes());
 
+  /* ── tag stats ── */
+  const tagStats = useMemo(() => {
+    const map = {};
+    notes.forEach(n => {
+      (n.tags || []).forEach(t => {
+        if (t) map[t] = (map[t] || 0) + 1;
+      });
+    });
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])  // most used first
+      .slice(0, 20);
+  }, [notes]);
+
+  /* ── filter ── */
   const filtered = useMemo(() => {
     let list = notes;
     if (activeCategory !== 'all') {
       list = list.filter(n => n.category === activeCategory);
+    }
+    if (selectedTag) {
+      list = list.filter(n => (n.tags || []).includes(selectedTag));
     }
     if (search.trim()) {
       const kw = search.trim().toLowerCase();
@@ -27,7 +45,7 @@ export default function Notes() {
       );
     }
     return list;
-  }, [notes, activeCategory, search]);
+  }, [notes, activeCategory, selectedTag, search]);
 
   const handleDelete = (id) => {
     deleteNote(id);
@@ -52,7 +70,6 @@ export default function Notes() {
 
   const getPreview = (content) => {
     if (!content) return '暂无内容';
-    // Strip markdown symbols for preview
     const plain = content
       .replace(/[#*`>\-\[\]()]/g, '')
       .replace(/\n+/g, ' ')
@@ -90,27 +107,50 @@ export default function Notes() {
         <button
           className={`note-cat-tag ${activeCategory === 'all' ? 'active' : ''}`}
           onClick={() => setActiveCategory('all')}
-        >
-          全部
-        </button>
+        >全部</button>
         {NOTE_CATEGORIES.map(cat => (
           <button
             key={cat.key}
             className={`note-cat-tag ${activeCategory === cat.key ? 'active' : ''}`}
             style={activeCategory === cat.key ? { background: cat.color, borderColor: cat.color, color: '#fff' } : {}}
             onClick={() => setActiveCategory(cat.key)}
-          >
-            {cat.icon} {cat.label}
-          </button>
+          >{cat.icon} {cat.label}</button>
         ))}
       </div>
 
+      {/* ── Tag statistics ── */}
+      {tagStats.length > 0 && (
+        <div className="tag-stats-bar">
+          <span className="tag-stats-label">🏷️ 标签</span>
+          <div className="tag-stats-scroll">
+            {tagStats.map(([tag, count]) => (
+              <button
+                key={tag}
+                className={`tag-stat-chip ${selectedTag === tag ? 'active' : ''}`}
+                onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+              >
+                #{tag}
+                <span className="tag-count">{count}</span>
+              </button>
+            ))}
+          </div>
+          {selectedTag && (
+            <button className="tag-clear-btn" onClick={() => setSelectedTag(null)}>✕</button>
+          )}
+        </div>
+      )}
+
       {/* Note list */}
       <div className="page-scroll note-list-scroll">
+        {selectedTag && (
+          <div className="active-filter-hint">
+            标签 <strong>#{selectedTag}</strong> · {filtered.length} 篇笔记
+          </div>
+        )}
         {filtered.length === 0 ? (
           <div className="empty-state">
             <span className="empty-icon">📭</span>
-            <p>{search ? '没有匹配的笔记' : '暂无笔记'}</p>
+            <p>{search || selectedTag ? '没有匹配的笔记' : '暂无笔记'}</p>
             <p className="empty-hint">点击右上角"新建"开始写笔记吧</p>
           </div>
         ) : (
@@ -134,7 +174,14 @@ export default function Notes() {
                   {note.tags && note.tags.length > 0 && (
                     <div className="note-card-tags">
                       {note.tags.map((tag, i) => (
-                        <span key={i} className="note-tag">#{tag}</span>
+                        <span
+                          key={i}
+                          className={`note-tag ${selectedTag === tag ? 'highlight' : ''}`}
+                          onClick={e => {
+                            e.stopPropagation();
+                            setSelectedTag(selectedTag === tag ? null : tag);
+                          }}
+                        >#{tag}</span>
                       ))}
                     </div>
                   )}
@@ -144,9 +191,7 @@ export default function Notes() {
                       e.stopPropagation();
                       setDeleteId(deleteId === note.id ? null : note.id);
                     }}
-                  >
-                    🗑️
-                  </button>
+                  >🗑️</button>
                   {deleteId === note.id && (
                     <div className="delete-confirm anim-fade-in" onClick={e => e.stopPropagation()}>
                       <span>确定删除？</span>

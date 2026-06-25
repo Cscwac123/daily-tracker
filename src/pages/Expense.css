@@ -170,6 +170,8 @@
   flex-shrink: 0;
   border-top: 1px solid var(--border);
   background: var(--card);
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+  overflow-y: auto;
 }
 
 .numpad {

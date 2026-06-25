@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Home from './pages/Home';
 import Expense from './pages/Expense';
 import Notes from './pages/Notes';
@@ -16,17 +16,45 @@ export default function App() {
   const [homeKey, setHomeKey] = useState(0);
   const [expenseKey, setExpenseKey] = useState(0);
   const [notesKey, setNotesKey] = useState(0);
+  const [tabVisible, setTabVisible] = useState(true);
+
+  const lastScrollY = useRef(0);
+  const hideTimer = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = (e) => {
+      const st = e.target.scrollTop;
+      if (st <= 5) {
+        setTabVisible(true);
+      } else if (st > lastScrollY.current && st > 60) {
+        setTabVisible(false);
+      } else if (st < lastScrollY.current - 8) {
+        setTabVisible(true);
+      }
+      lastScrollY.current = st;
+
+      // show tab bar after 3s idle
+      clearTimeout(hideTimer.current);
+      hideTimer.current = setTimeout(() => setTabVisible(true), 3000);
+    };
+
+    document.addEventListener('scroll', handleScroll, { capture: true, passive: true });
+    return () => {
+      document.removeEventListener('scroll', handleScroll, { capture: true });
+      clearTimeout(hideTimer.current);
+    };
+  }, []);
 
   const switchTab = useCallback((tab) => {
     setActiveTab(tab);
-    // Force fresh mount when switching to a tab
+    setTabVisible(true);
+    lastScrollY.current = 0;
     if (tab === 'home') setHomeKey(k => k + 1);
     if (tab === 'expense') setExpenseKey(k => k + 1);
     if (tab === 'notes') setNotesKey(k => k + 1);
   }, []);
 
   const handleSaved = useCallback(() => {
-    // Force home to refresh next time user views it
     setHomeKey(k => k + 1);
   }, []);
 
@@ -37,7 +65,7 @@ export default function App() {
         {activeTab === 'expense' && <Expense key={expenseKey} onSaved={handleSaved} />}
         {activeTab === 'notes' && <Notes key={notesKey} />}
       </main>
-      <TabBar tabs={TABS} active={activeTab} onChange={switchTab} />
+      <TabBar tabs={TABS} active={activeTab} onChange={switchTab} visible={tabVisible} />
     </div>
   );
 }
