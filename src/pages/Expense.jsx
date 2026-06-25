@@ -54,10 +54,11 @@ export default function Expense({ onSaved }) {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 1500);
 
-    // Reset form
+    // Reset amount & note, keep category/type/date
     setAmount('');
     setNote('');
-    onSaved && onSaved();
+    // Tell parent to refresh home
+    if (onSaved) onSaved();
   };
 
   const displayAmount = amount || '0';
