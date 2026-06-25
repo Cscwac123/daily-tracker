@@ -1,25 +1,15 @@
-import { useState, useEffect } from 'react';
-import { getExpenses } from '../utils/storage';
+import { useState, useEffect, useCallback } from 'react';
+import { getExpenses, deleteExpense } from '../utils/storage';
 import { getCategoryByKey } from '../utils/categories';
 import './Home.css';
 
 /* ── rotating backend tech phrases ── */
 const TECH_LIST = [
-  'Spring Boot 微服务',
-  'Redis 缓存穿透',
-  'MySQL 索引优化',
-  'Docker 容器编排',
-  'Kubernetes 集群',
-  'RabbitMQ 消息队列',
-  'Nginx 反向代理',
-  'Linux 系统调优',
-  'Elasticsearch 全文检索',
-  'JVM 垃圾回收',
-  '分布式事务 Seata',
-  'CI/CD 流水线',
-  'Netty 高性能 IO',
-  'MyBatis 源码解析',
-  'Sentinel 熔断降级',
+  'Spring Boot 微服务', 'Redis 缓存穿透', 'MySQL 索引优化',
+  'Docker 容器编排', 'Kubernetes 集群', 'RabbitMQ 消息队列',
+  'Nginx 反向代理', 'Linux 系统调优', 'Elasticsearch 全文检索',
+  'JVM 垃圾回收', '分布式事务 Seata', 'CI/CD 流水线',
+  'Netty 高性能 IO', 'MyBatis 源码解析', 'Sentinel 熔断降级',
 ];
 
 /* ── weather helpers ── */
@@ -45,8 +35,13 @@ const WEATHER_CODE_MAP = {
   75: ['❄️', '大雪'], 80: ['⛈️', '雷阵雨'], 95: ['⛈️', '雷暴'],
 };
 
+const DAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+
 export default function Home() {
-  /* ── month expense data (direct read, always fresh) ── */
+  /* ── force refresh after delete ── */
+  const [tick, setTick] = useState(0);
+
+  /* ── month navigation ── */
   const [monthOffset, setMonthOffset] = useState(0);
 
   const d = new Date();
@@ -54,11 +49,17 @@ export default function Home() {
   const year = d.getFullYear();
   const month = d.getMonth() + 1;
   const monthStr = `${year}-${String(month).padStart(2, '0')}`;
+  const daysInMonth = new Date(year, month, 0).getDate();
 
-  const all = getExpenses();
+  /* ── compute all stats (re-runs on tick change) ── */
+  const all = getExpenses(); // eslint-disable-line
+  const _ = tick; // force recompute on delete
+
   const filtered = all.filter(e => e.date && e.date.startsWith(monthStr));
   let incomeTotal = 0, expenseTotal = 0;
-  const catMap = {};
+  const catMap = {}, dayMap = {};
+  for (let i = 1; i <= daysInMonth; i++) dayMap[i] = 0;
+
   filtered.forEach(e => {
     if (e.type === 'income') {
       incomeTotal += e.amount;
@@ -66,11 +67,34 @@ export default function Home() {
       expenseTotal += e.amount;
       catMap[e.category] = (catMap[e.category] || 0) + e.amount;
     }
+    const day = parseInt(e.date?.split('-')[2], 10);
+    if (day >= 1 && day <= daysInMonth) {
+      dayMap[day] = (dayMap[day] || 0) + e.amount;
+    }
   });
+
   const categoryStats = Object.entries(catMap)
     .map(([key, amount]) => ({ ...getCategoryByKey(key, 'expense'), key, amount }))
     .sort((a, b) => b.amount - a.amount);
-  const recentList = filtered.slice(0, 10);
+  const recentList = filtered.slice(0, 30);
+
+  /* bar chart data */
+  const dayBars = Array.from({ length: daysInMonth }, (_, i) => ({
+    day: i + 1,
+    amount: dayMap[i + 1] || 0,
+  }));
+  const maxDayAmount = Math.max(...dayBars.map(d => d.amount), 1);
+
+  /* ── delete handler ── */
+  const [confirmId, setConfirmId] = useState(null);
+  const handleDelete = useCallback((id) => {
+    deleteExpense(id);
+    setConfirmId(null);
+    setTick(t => t + 1);
+    if (typeof window !== 'undefined' && window.dispatchEvent) {
+      window.dispatchEvent(new Event('expense-changed'));
+    }
+  }, []);
 
   /* ── rotating tech text ── */
   const [techIdx, setTechIdx] = useState(() => Math.floor(Math.random() * TECH_LIST.length));
@@ -96,6 +120,7 @@ export default function Home() {
     return () => { cancelled = true; };
   }, []);
 
+  /* ── helpers ── */
   const formatMoney = (v) => {
     if (v >= 10000) return `${(v / 10000).toFixed(1)}万`;
     return v.toFixed(2);
@@ -123,26 +148,15 @@ export default function Home() {
           <div className="weather-bar anim-fade-in">
             {(() => {
               const wm = WEATHER_CODE_MAP[weather.weathercode] || ['🌡️', '--'];
-              return (
-                <>
-                  <span className="weather-icon">{wm[0]}</span>
-                  <span className="weather-text">{wm[1]} {weather.temperature}°C</span>
-                  <span className="weather-wind">💨 {weather.windspeed}km/h</span>
-                </>
-              );
+              return (<><span className="weather-icon">{wm[0]}</span><span className="weather-text">{wm[1]} {weather.temperature}°C</span><span className="weather-wind">💨 {weather.windspeed}km/h</span></>);
             })()}
           </div>
         )}
         {weatherError && (
-          <div className="weather-bar weather-muted anim-fade-in">
-            <span className="weather-icon">🌍</span>
-            <span className="weather-text">允许定位即可获取天气</span>
-          </div>
+          <div className="weather-bar weather-muted anim-fade-in"><span className="weather-icon">🌍</span><span className="weather-text">允许定位即可获取天气</span></div>
         )}
         {!weather && !weatherError && (
-          <div className="weather-bar weather-muted">
-            <span className="weather-text">📍 正在获取天气...</span>
-          </div>
+          <div className="weather-bar weather-muted"><span className="weather-text">📍 正在获取天气...</span></div>
         )}
 
         {/* ── rotating tech ticker ── */}
@@ -163,11 +177,38 @@ export default function Home() {
           </div>
           <div className="summary-card balance-card">
             <span className="summary-label">结余</span>
-            <span className={`summary-amount ${incomeTotal - expenseTotal >= 0 ? 'income-amount' : 'expense-amount'}`}>
-              ¥{formatMoney(incomeTotal - expenseTotal)}
-            </span>
+            <span className={`summary-amount ${incomeTotal - expenseTotal >= 0 ? 'income-amount' : 'expense-amount'}`}>¥{formatMoney(incomeTotal - expenseTotal)}</span>
           </div>
         </div>
+
+        {/* ── Monthly bar chart ── */}
+        {filtered.length > 0 && (
+          <section className="card section-card">
+            <h3 className="section-title">📊 每日支出</h3>
+            <div className="bar-chart">
+              {dayBars.map(d => (
+                <div key={d.day} className="bar-col" title={`${d.day}日: ¥${d.amount.toFixed(2)}`}>
+                  <span className="bar-amount-label">{d.amount > 0 ? formatMoney(d.amount) : ''}</span>
+                  <div className="bar-track">
+                    <div
+                      className="bar-fill"
+                      style={{
+                        height: `${(d.amount / maxDayAmount) * 100}%`,
+                        minHeight: d.amount > 0 ? '3px' : '0',
+                      }}
+                    />
+                  </div>
+                  <span className="bar-day-label">{d.day}</span>
+                </div>
+              ))}
+            </div>
+            <div className="chart-legend">
+              {dayBars.length > 7 && (
+                <span className="legend-text">共{daysInMonth}天 | 最高 ¥{formatMoney(maxDayAmount)}</span>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Category breakdown */}
         {categoryStats.length > 0 && (
@@ -179,10 +220,7 @@ export default function Home() {
                   <span className="cat-icon">{cat.icon}</span>
                   <span className="cat-label">{cat.label}</span>
                   <div className="cat-bar-track">
-                    <div className="cat-bar-fill" style={{
-                      width: `${Math.max((cat.amount / maxCatAmount) * 100, 3)}%`,
-                      background: cat.color,
-                    }} />
+                    <div className="cat-bar-fill" style={{ width: `${Math.max((cat.amount / maxCatAmount) * 100, 3)}%`, background: cat.color }} />
                   </div>
                   <span className="cat-amount">¥{formatMoney(cat.amount)}</span>
                 </div>
@@ -204,8 +242,9 @@ export default function Home() {
             <div className="recent-list">
               {recentList.map(item => {
                 const cat = getCategoryByKey(item.category, item.type);
+                const isConfirming = confirmId === item.id;
                 return (
-                  <div key={item.id} className="recent-item">
+                  <div key={item.id} className={`recent-item ${isConfirming ? 'deleting' : ''}`}>
                     <span className="recent-icon" style={{ background: cat.color + '22' }}>{cat.icon}</span>
                     <div className="recent-info">
                       <span className="recent-cat">{cat.label}</span>
@@ -217,6 +256,14 @@ export default function Home() {
                       </span>
                       <span className="recent-date">{item.date?.slice(5) || ''}</span>
                     </div>
+                    {isConfirming ? (
+                      <div className="delete-confirm">
+                        <button className="del-btn-yes" onClick={() => handleDelete(item.id)}>确认删除</button>
+                        <button className="del-btn-no" onClick={() => setConfirmId(null)}>取消</button>
+                      </div>
+                    ) : (
+                      <button className="recent-delete" onClick={() => setConfirmId(item.id)}>🗑️</button>
+                    )}
                   </div>
                 );
               })}
