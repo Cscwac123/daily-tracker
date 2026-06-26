@@ -66,10 +66,10 @@ export default function Home() {
     } else {
       expenseTotal += e.amount;
       catMap[e.category] = (catMap[e.category] || 0) + e.amount;
-    }
-    const day = parseInt(e.date?.split('-')[2], 10);
-    if (day >= 1 && day <= daysInMonth) {
-      dayMap[day] = (dayMap[day] || 0) + e.amount;
+      const day = parseInt(e.date?.split('-')[2], 10);
+      if (day >= 1 && day <= daysInMonth) {
+        dayMap[day] = (dayMap[day] || 0) + e.amount;
+      }
     }
   });
 
