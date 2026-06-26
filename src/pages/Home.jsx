@@ -203,34 +203,19 @@ export default function Home() {
                 <div key={d.day} className="bar-col"
                   title={`${d.day}日  支出:¥${d.expense.toFixed(2)}  收入:¥${d.income.toFixed(2)}  结余:¥${d.balance.toFixed(2)}`}>
                   <span className="bar-amount-label">{d.balance !== 0 ? formatMoney(d.balance) : ''}</span>
-                  <div className="bar-group">
-                    <div className="bar-track expense-track">
-                      <div
-                        className="bar-fill expense-fill"
-                        style={{
-                          height: `${(d.expense / maxDayAmount) * 100}%`,
-                          minHeight: d.expense > 0 ? '2px' : '0',
-                        }}
-                      />
-                    </div>
-                    <div className="bar-track income-track">
-                      <div
-                        className="bar-fill income-fill"
-                        style={{
-                          height: `${(d.income / maxDayAmount) * 100}%`,
-                          minHeight: d.income > 0 ? '2px' : '0',
-                        }}
-                      />
-                    </div>
-                    <div className="bar-track balance-track">
-                      <div
-                        className="bar-fill balance-fill"
-                        style={{
-                          height: `${(Math.abs(d.balance) / maxDayAmount) * 100}%`,
-                          minHeight: d.balance !== 0 ? '2px' : '0',
-                        }}
-                      />
-                    </div>
+                  <div className="bar-track">
+                    <div
+                      className="bar-fill balance-fill"
+                      style={{ height: `${(Math.abs(d.balance) / maxDayAmount) * 100}%`, minHeight: d.balance !== 0 ? '2px' : '0' }}
+                    />
+                    <div
+                      className="bar-fill income-fill"
+                      style={{ height: `${(d.income / maxDayAmount) * 100}%`, minHeight: d.income > 0 ? '2px' : '0' }}
+                    />
+                    <div
+                      className="bar-fill expense-fill"
+                      style={{ height: `${(d.expense / maxDayAmount) * 100}%`, minHeight: d.expense > 0 ? '2px' : '0' }}
+                    />
                   </div>
                   <span className="bar-day-label">{d.day}</span>
                 </div>

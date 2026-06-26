@@ -320,42 +320,32 @@
   max-width: 100%;
 }
 
-.bar-group {
-  display: flex;
-  flex: 1;
-  gap: 1px;
-  width: 100%;
-  align-items: flex-end;
-}
-
 .bar-track {
   flex: 1;
-  min-width: 0;
+  width: 100%;
+  max-width: 22px;
   background: var(--bg);
-  border-radius: 2px 2px 0 0;
+  border-radius: 3px 3px 0 0;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
   overflow: hidden;
 }
 
 .bar-fill {
   width: 100%;
-  border-radius: 2px 2px 0 0;
   transition: height 0.4s ease;
   min-height: 0;
 }
 
-/* 支出 — red */
-.expense-track { background: #fde8e8; }
-.expense-fill { background: linear-gradient(to top, #e53e3e, #fc8181); }
+/* 结余 — blue (top) */
+.balance-fill { background: linear-gradient(to top, #3182ce, #63b3ed); }
 
-/* 收入 — green */
-.income-track { background: #e6f7ec; }
+/* 收入 — green (middle) */
 .income-fill { background: linear-gradient(to top, #38a169, #68d391); }
 
-/* 结余 — blue */
-.balance-track { background: #e8f0fe; }
-.balance-fill { background: linear-gradient(to top, #3182ce, #63b3ed); }
+/* 支出 — red (bottom) */
+.expense-fill { background: linear-gradient(to top, #e53e3e, #fc8181); }
 
 .bar-day-label {
   font-size: 9px;
