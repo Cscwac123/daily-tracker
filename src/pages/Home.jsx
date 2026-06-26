@@ -57,18 +57,24 @@ export default function Home() {
 
   const filtered = all.filter(e => e.date && e.date.startsWith(monthStr));
   let incomeTotal = 0, expenseTotal = 0;
-  const catMap = {}, dayMap = {};
-  for (let i = 1; i <= daysInMonth; i++) dayMap[i] = 0;
+  const catMap = {}, dayIncome = {}, dayExpense = {};
+  for (let i = 1; i <= daysInMonth; i++) {
+    dayIncome[i] = 0;
+    dayExpense[i] = 0;
+  }
 
   filtered.forEach(e => {
+    const day = parseInt(e.date?.split('-')[2], 10);
     if (e.type === 'income') {
       incomeTotal += e.amount;
+      if (day >= 1 && day <= daysInMonth) {
+        dayIncome[day] = (dayIncome[day] || 0) + e.amount;
+      }
     } else {
       expenseTotal += e.amount;
       catMap[e.category] = (catMap[e.category] || 0) + e.amount;
-      const day = parseInt(e.date?.split('-')[2], 10);
       if (day >= 1 && day <= daysInMonth) {
-        dayMap[day] = (dayMap[day] || 0) + e.amount;
+        dayExpense[day] = (dayExpense[day] || 0) + e.amount;
       }
     }
   });
@@ -78,12 +84,19 @@ export default function Home() {
     .sort((a, b) => b.amount - a.amount);
   const recentList = filtered.slice(0, 30);
 
-  /* bar chart data */
-  const dayBars = Array.from({ length: daysInMonth }, (_, i) => ({
-    day: i + 1,
-    amount: dayMap[i + 1] || 0,
-  }));
-  const maxDayAmount = Math.max(...dayBars.map(d => d.amount), 1);
+  /* bar chart data — three series per day */
+  const dayBars = Array.from({ length: daysInMonth }, (_, i) => {
+    const income = dayIncome[i + 1] || 0;
+    const expense = dayExpense[i + 1] || 0;
+    return {
+      day: i + 1,
+      expense,
+      income,
+      balance: income - expense,
+    };
+  });
+  const allVals = dayBars.flatMap(d => [d.expense, d.income, Math.abs(d.balance)]);
+  const maxDayAmount = Math.max(...allVals, 1);
 
   /* ── delete handler ── */
   const [confirmId, setConfirmId] = useState(null);
@@ -184,28 +197,49 @@ export default function Home() {
         {/* ── Monthly bar chart ── */}
         {filtered.length > 0 && (
           <section className="card section-card">
-            <h3 className="section-title">📊 每日支出</h3>
+            <h3 className="section-title">📊 每日收支</h3>
             <div className="bar-chart">
               {dayBars.map(d => (
-                <div key={d.day} className="bar-col" title={`${d.day}日: ¥${d.amount.toFixed(2)}`}>
-                  <span className="bar-amount-label">{d.amount > 0 ? formatMoney(d.amount) : ''}</span>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill"
-                      style={{
-                        height: `${(d.amount / maxDayAmount) * 100}%`,
-                        minHeight: d.amount > 0 ? '3px' : '0',
-                      }}
-                    />
+                <div key={d.day} className="bar-col"
+                  title={`${d.day}日  支出:¥${d.expense.toFixed(2)}  收入:¥${d.income.toFixed(2)}  结余:¥${d.balance.toFixed(2)}`}>
+                  <span className="bar-amount-label">{d.balance !== 0 ? formatMoney(d.balance) : ''}</span>
+                  <div className="bar-group">
+                    <div className="bar-track expense-track">
+                      <div
+                        className="bar-fill expense-fill"
+                        style={{
+                          height: `${(d.expense / maxDayAmount) * 100}%`,
+                          minHeight: d.expense > 0 ? '2px' : '0',
+                        }}
+                      />
+                    </div>
+                    <div className="bar-track income-track">
+                      <div
+                        className="bar-fill income-fill"
+                        style={{
+                          height: `${(d.income / maxDayAmount) * 100}%`,
+                          minHeight: d.income > 0 ? '2px' : '0',
+                        }}
+                      />
+                    </div>
+                    <div className="bar-track balance-track">
+                      <div
+                        className="bar-fill balance-fill"
+                        style={{
+                          height: `${(Math.abs(d.balance) / maxDayAmount) * 100}%`,
+                          minHeight: d.balance !== 0 ? '2px' : '0',
+                        }}
+                      />
+                    </div>
                   </div>
                   <span className="bar-day-label">{d.day}</span>
                 </div>
               ))}
             </div>
             <div className="chart-legend">
-              {dayBars.length > 7 && (
-                <span className="legend-text">共{daysInMonth}天 | 最高 ¥{formatMoney(maxDayAmount)}</span>
-              )}
+              <span className="legend-dot expense-dot" /> 支出
+              <span className="legend-dot income-dot" /> 收入
+              <span className="legend-dot balance-dot" /> 结余
             </div>
           </section>
         )}

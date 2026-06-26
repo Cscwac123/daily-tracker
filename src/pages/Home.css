@@ -310,21 +310,29 @@
 }
 
 .bar-amount-label {
-  font-size: 8px;
-  color: var(--text-muted);
+  font-size: 7px;
+  color: var(--note);
   white-space: nowrap;
-  writing-mode: vertical-lr;
-  text-orientation: mixed;
-  min-height: 0;
+  font-weight: 600;
+  min-height: 10px;
   overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.bar-group {
+  display: flex;
+  flex: 1;
+  gap: 1px;
+  width: 100%;
+  align-items: flex-end;
 }
 
 .bar-track {
   flex: 1;
-  width: 100%;
-  max-width: 20px;
+  min-width: 0;
   background: var(--bg);
-  border-radius: 3px 3px 0 0;
+  border-radius: 2px 2px 0 0;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -332,11 +340,22 @@
 
 .bar-fill {
   width: 100%;
-  background: linear-gradient(to top, var(--primary), #ff8e8e);
-  border-radius: 3px 3px 0 0;
+  border-radius: 2px 2px 0 0;
   transition: height 0.4s ease;
   min-height: 0;
 }
+
+/* 支出 — red */
+.expense-track { background: #fde8e8; }
+.expense-fill { background: linear-gradient(to top, #e53e3e, #fc8181); }
+
+/* 收入 — green */
+.income-track { background: #e6f7ec; }
+.income-fill { background: linear-gradient(to top, #38a169, #68d391); }
+
+/* 结余 — blue */
+.balance-track { background: #e8f0fe; }
+.balance-fill { background: linear-gradient(to top, #3182ce, #63b3ed); }
 
 .bar-day-label {
   font-size: 9px;
@@ -345,14 +364,26 @@
 }
 
 .chart-legend {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
 }
 
-.legend-text {
-  font-size: 11px;
-  color: var(--text-muted);
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 2px;
 }
+
+.expense-dot { background: #e53e3e; }
+.income-dot { background: #38a169; }
+.balance-dot { background: #3182ce; }
 
 /* === Delete Button === */
 .recent-item {
