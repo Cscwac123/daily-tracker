@@ -332,6 +332,14 @@
   overflow: hidden;
 }
 
+.bar-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: height 0.4s ease;
+}
+
 .bar-fill {
   width: 100%;
   transition: height 0.4s ease;
