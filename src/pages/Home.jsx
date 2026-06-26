@@ -134,11 +134,28 @@ export default function Home() {
     return () => { cancelled = true; };
   }, []);
 
+  /* ── bar popup state ── */
+  const [barPopup, setBarPopup] = useState(null);
+
   /* ── helpers ── */
   const formatMoney = (v) => {
     if (v >= 10000) return `${(v / 10000).toFixed(1)}万`;
     return v.toFixed(2);
   };
+
+  const handleBarClick = (day, segment, e) => {
+    e.stopPropagation();
+    if (barPopup && barPopup.day === day && barPopup.segment === segment) {
+      setBarPopup(null);
+    } else {
+      setBarPopup({ day, segment });
+    }
+  };
+
+  const clearBarPopup = () => setBarPopup(null);
+
+  const SEG_LABEL = { expense: '支出', income: '收入', balance: '结余' };
+  const SEG_COLOR = { expense: '#e53e3e', income: '#38a169', balance: '#3182ce' };
 
   const maxCatAmount = categoryStats.length > 0 ? categoryStats[0].amount : 1;
   const monthLabel = `${year}年${month}月`;
@@ -197,7 +214,7 @@ export default function Home() {
 
         {/* ── Monthly bar chart ── */}
         {filtered.length > 0 && (
-          <section className="card section-card">
+          <section className="card section-card" onClick={clearBarPopup}>
             <h3 className="section-title">📊 每日收支</h3>
             <div className="bar-chart">
               {dayBars.map(d => {
@@ -205,18 +222,26 @@ export default function Home() {
                   const expensePct = d.total > 0 ? (d.expense / d.total) * 100 : 0;
                   const incomePct = d.total > 0 ? (d.income / d.total) * 100 : 0;
                   const balancePct = d.total > 0 ? (Math.abs(d.balance) / d.total) * 100 : 0;
+                  const isActive = barPopup && barPopup.day === d.day;
                   return (
-                    <div key={d.day} className="bar-col"
-                      title={`${d.day}日  支出:¥${d.expense.toFixed(2)}  收入:¥${d.income.toFixed(2)}  结余:¥${d.balance.toFixed(2)}`}>
-                      <span className="bar-amount-label">{d.balance !== 0 ? formatMoney(d.balance) : ''}</span>
+                    <div key={d.day} className={`bar-col${isActive ? ' bar-active' : ''}`}>
                       <div className="bar-track">
                         <div className="bar-stack" style={{ height: `${barPct}%` }}>
-                          <div className="bar-fill balance-fill"
-                            style={{ height: `${balancePct}%`, minHeight: d.balance !== 0 ? '2px' : '0' }} />
-                          <div className="bar-fill income-fill"
-                            style={{ height: `${incomePct}%`, minHeight: d.income > 0 ? '2px' : '0' }} />
-                          <div className="bar-fill expense-fill"
-                            style={{ height: `${expensePct}%`, minHeight: d.expense > 0 ? '2px' : '0' }} />
+                          <div
+                            className={`bar-fill balance-fill${isActive && barPopup.segment === 'balance' ? ' bar-selected' : ''}`}
+                            style={{ height: `${balancePct}%`, minHeight: d.balance !== 0 ? '4px' : '0' }}
+                            onClick={d.balance !== 0 ? (e) => handleBarClick(d.day, 'balance', e) : undefined}
+                          />
+                          <div
+                            className={`bar-fill income-fill${isActive && barPopup.segment === 'income' ? ' bar-selected' : ''}`}
+                            style={{ height: `${incomePct}%`, minHeight: d.income > 0 ? '4px' : '0' }}
+                            onClick={d.income > 0 ? (e) => handleBarClick(d.day, 'income', e) : undefined}
+                          />
+                          <div
+                            className={`bar-fill expense-fill${isActive && barPopup.segment === 'expense' ? ' bar-selected' : ''}`}
+                            style={{ height: `${expensePct}%`, minHeight: d.expense > 0 ? '4px' : '0' }}
+                            onClick={d.expense > 0 ? (e) => handleBarClick(d.day, 'expense', e) : undefined}
+                          />
                         </div>
                       </div>
                       <span className="bar-day-label">{d.day}</span>
@@ -229,6 +254,43 @@ export default function Home() {
               <span className="legend-dot income-dot" /> 收入
               <span className="legend-dot balance-dot" /> 结余
             </div>
+
+            {/* Bar click popup */}
+            {barPopup && (() => {
+              const d = dayBars[barPopup.day - 1];
+              return (
+                <div className="bar-popup anim-fade-in" onClick={e => e.stopPropagation()}>
+                  <div className="bar-popup-header">
+                    <span className="bar-popup-day">📅 {d.day}日</span>
+                    <span className="bar-popup-seg" style={{ color: SEG_COLOR[barPopup.segment] }}>
+                      {SEG_LABEL[barPopup.segment]}明细
+                    </span>
+                    <button className="bar-popup-close" onClick={clearBarPopup}>✕</button>
+                  </div>
+                  <div className="bar-popup-row">
+                    <span className="bar-popup-label">🔴 支出</span>
+                    <span className={`bar-popup-val${barPopup.segment === 'expense' ? ' popup-highlight' : ''}`}
+                      style={barPopup.segment === 'expense' ? { color: SEG_COLOR.expense } : {}}>
+                      ¥{d.expense.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="bar-popup-row">
+                    <span className="bar-popup-label">🟢 收入</span>
+                    <span className={`bar-popup-val${barPopup.segment === 'income' ? ' popup-highlight' : ''}`}
+                      style={barPopup.segment === 'income' ? { color: SEG_COLOR.income } : {}}>
+                      ¥{d.income.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="bar-popup-row">
+                    <span className="bar-popup-label">🔵 结余</span>
+                    <span className={`bar-popup-val${barPopup.segment === 'balance' ? ' popup-highlight' : ''}`}
+                      style={barPopup.segment === 'balance' ? { color: SEG_COLOR.balance, fontWeight: 700 } : {}}>
+                      ¥{d.balance.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
           </section>
         )}
 

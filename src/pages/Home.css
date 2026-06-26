@@ -307,19 +307,10 @@
   height: 100%;
   gap: 2px;
   min-width: 0;
-  position: relative;
-  padding-top: 14px;
 }
 
 .bar-amount-label {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 8px;
-  color: var(--note);
-  white-space: nowrap;
-  font-weight: 700;
+  display: none;
 }
 
 .bar-track {
@@ -344,8 +335,22 @@
 
 .bar-fill {
   width: 100%;
-  transition: height 0.4s ease;
+  transition: height 0.4s ease, opacity 0.2s;
   min-height: 0;
+  cursor: pointer;
+}
+
+.bar-fill:active {
+  opacity: 0.7;
+}
+
+.bar-selected {
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.7);
+}
+
+.bar-active .bar-track {
+  box-shadow: 0 0 0 1px var(--note);
+  border-radius: 4px 4px 0 0;
 }
 
 /* 结余 — blue (top) */
@@ -460,4 +465,71 @@
 .empty-hint {
   font-size: 12px !important;
   color: var(--text-muted);
+}
+
+/* === Bar Popup === */
+.bar-popup {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.bar-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.bar-popup-day {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.bar-popup-seg {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bar-popup-close {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bar-popup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.bar-popup-row:last-child {
+  border-bottom: none;
+}
+
+.bar-popup-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.bar-popup-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.popup-highlight {
+  font-size: 16px;
 }
